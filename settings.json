@@ -1,0 +1,9 @@
+{
+    "username" :"xxxx",
+    "password" :"xxxx",
+    "schedulePeriodMin": 70,
+    "loginWaitMillis": 5000,
+    "adWaitMillis": 5000,
+    "afterAdQuitMillis": 180000,
+    "adLoopCount":10
+    }
