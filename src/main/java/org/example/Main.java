@@ -1,15 +1,19 @@
 package org.example;
 
+import com.google.common.base.Function;
 import org.openqa.selenium.By;
+import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.WindowType;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.json.simple.*;
 import org.json.simple.parser.*;
+import org.openqa.selenium.support.ui.FluentWait;
 
 import java.io.*;
 
+import java.time.Duration;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
@@ -103,6 +107,21 @@ public class Main {
                     WebElement watchAdButton = driver.findElement(By.cssSelector("#body-content > div.row.row-h-sm-600.row-h-md-23.overflow-hidden.theme-stepover-0.businessclub-container > div.col-xs-12.col-h-xs-22.col-h-sm-20.businessclub-rows-container > div > div:nth-child(1) > div"));
                     watchAdButton.click();
                     System.out.println("Reklam başlatıldı.");
+                    FluentWait<WebDriver> wait = new FluentWait<>(driver)
+                            .withTimeout(Duration.ofSeconds(10))
+                            .pollingEvery(Duration.ofSeconds(2))
+                            .ignoring(NoSuchElementException.class);
+                    WebElement ad = wait.until(new Function<WebDriver, WebElement>() {
+                        public WebElement apply(WebDriver driver) {
+                            return driver.findElement(By.cssSelector("#aipLogo"));
+                        }
+                    });
+                    if (!ad.isDisplayed()) {
+                        driver.close();
+                        System.out.println("Reklam Açılması Başarısız oldu Tekrar Deneniyor.");
+                        driver.get("https://en.onlinesoccermanager.com/BusinessClub");
+                        driver.findElement(By.cssSelector("#body-content > div.row.row-h-sm-600.row-h-md-23.overflow-hidden.theme-stepover-0.businessclub-container > div.col-xs-12.col-h-xs-22.col-h-sm-20.businessclub-rows-container > div > div:nth-child(1) > div")).click();
+                    }
                     Thread.currentThread().sleep(adWaitMillis);
                 }
 
