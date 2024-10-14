@@ -9,6 +9,7 @@ import org.openqa.selenium.WindowType;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.json.simple.*;
 import org.json.simple.parser.*;
+import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.support.ui.FluentWait;
 
 import java.io.*;
@@ -60,7 +61,9 @@ public class Main {
         @Override
         public void run() {
             try {
-                WebDriver driver = new ChromeDriver();
+                ChromeOptions options = new ChromeOptions();
+                options.addArguments("--headless");
+                WebDriver driver = new ChromeDriver(options);
                 watchAd(driver, username, password, loginWaitMillis, adWaitMillis, afterAdQuitMillis, adLoopCount);
             } catch (InterruptedException e) {
                 throw new RuntimeException(e);
@@ -91,8 +94,6 @@ public class Main {
             Thread.currentThread().sleep(loginWaitMillis);
             actualLoginButton.click();
             Thread.currentThread().sleep(loginWaitMillis);
-            driver.navigate().to("https://en.onlinesoccermanager.com/ChooseLeague/");
-
 
             driver.navigate().to("https://en.onlinesoccermanager.com/BusinessClub");
             String originalHandle = driver.getWindowHandle();
@@ -107,21 +108,6 @@ public class Main {
                     WebElement watchAdButton = driver.findElement(By.cssSelector("#body-content > div.row.row-h-sm-600.row-h-md-23.overflow-hidden.theme-stepover-0.businessclub-container > div.col-xs-12.col-h-xs-22.col-h-sm-20.businessclub-rows-container > div > div:nth-child(1) > div"));
                     watchAdButton.click();
                     System.out.println("Reklam başlatıldı.");
-                    FluentWait<WebDriver> wait = new FluentWait<>(driver)
-                            .withTimeout(Duration.ofSeconds(10))
-                            .pollingEvery(Duration.ofSeconds(2))
-                            .ignoring(NoSuchElementException.class);
-                    WebElement ad = wait.until(new Function<WebDriver, WebElement>() {
-                        public WebElement apply(WebDriver driver) {
-                            return driver.findElement(By.cssSelector("#aipLogo"));
-                        }
-                    });
-                    if (!ad.isDisplayed()) {
-                        driver.close();
-                        System.out.println("Reklam Açılması Başarısız oldu Tekrar Deneniyor.");
-                        driver.get("https://en.onlinesoccermanager.com/BusinessClub");
-                        driver.findElement(By.cssSelector("#body-content > div.row.row-h-sm-600.row-h-md-23.overflow-hidden.theme-stepover-0.businessclub-container > div.col-xs-12.col-h-xs-22.col-h-sm-20.businessclub-rows-container > div > div:nth-child(1) > div")).click();
-                    }
                     Thread.currentThread().sleep(adWaitMillis);
                 }
 
