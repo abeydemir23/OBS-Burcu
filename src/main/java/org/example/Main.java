@@ -61,9 +61,7 @@ public class Main {
         @Override
         public void run() {
             try {
-                ChromeOptions options = new ChromeOptions();
-                options.addArguments("--headless");
-                WebDriver driver = new ChromeDriver(options);
+                WebDriver driver = new ChromeDriver();
                 watchAd(driver, username, password, loginWaitMillis, adWaitMillis, afterAdQuitMillis, adLoopCount);
             } catch (InterruptedException e) {
                 throw new RuntimeException(e);
@@ -94,8 +92,6 @@ public class Main {
             Thread.currentThread().sleep(loginWaitMillis);
             actualLoginButton.click();
             Thread.currentThread().sleep(loginWaitMillis);
-
-            driver.navigate().to("https://en.onlinesoccermanager.com/BusinessClub");
             String originalHandle = driver.getWindowHandle();
             try {
 
@@ -105,6 +101,7 @@ public class Main {
                     System.out.println("Mevcut Boss Coin : " + currentCoin.getText());
                     driver.switchTo().newWindow(WindowType.TAB);
                     driver.get("https://en.onlinesoccermanager.com/BusinessClub");
+                    Thread.currentThread().sleep(adWaitMillis);
                     WebElement watchAdButton = driver.findElement(By.cssSelector("#body-content > div.row.row-h-sm-600.row-h-md-23.overflow-hidden.theme-stepover-0.businessclub-container > div.col-xs-12.col-h-xs-22.col-h-sm-20.businessclub-rows-container > div > div:nth-child(1) > div"));
                     watchAdButton.click();
                     System.out.println("Reklam başlatıldı.");
@@ -124,6 +121,10 @@ public class Main {
             }
 
             driver.switchTo().window(originalHandle);
+            driver.navigate().refresh();
+            Thread.currentThread().sleep(adWaitMillis);
+            WebElement currentCoin = driver.findElement(By.cssSelector("#balances > div > div.wallet-amount.pull-left.center > div > span"));
+            System.out.println("Reklamlar bitti Mevcut Boss Coin : " + currentCoin.getText());
             driver.quit();
         }
     }
