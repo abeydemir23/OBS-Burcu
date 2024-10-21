@@ -74,14 +74,7 @@ public class Main {
 
             driver.manage().timeouts().implicitlyWait(10, TimeUnit.SECONDS);
 
-            driver.get("https://en.onlinesoccermanager.com/PrivacyNotice?nextUrl=%2FLogin");
-
-
-            WebElement button = driver.findElement(By.cssSelector("#page-privacynotice > div > div > div:nth-child(2) > div:nth-child(3) > div > button"));
-            button.click();
-
-            WebElement loginButton = driver.findElement(By.cssSelector("#page-signup > div.page.content.hidden-before-binding > div.register-information-container.horizontal-center-absolute > div.register-information-block.buttons > button"));
-            loginButton.click();
+            driver.get("https://en.onlinesoccermanager.com/Login?nextUrl=%2FCareer%3FnextUrl%3D%2FLogin");
 
 
             WebElement usernameField = driver.findElement(By.cssSelector("#manager-name"));
