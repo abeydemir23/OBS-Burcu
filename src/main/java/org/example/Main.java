@@ -61,13 +61,19 @@ public class Main {
 
         @Override
         public void run() {
+            WebDriver driver = null;
             try {
                 ChromeOptions op = new ChromeOptions();
                 // add muted argument
                 op.addArguments("−−mute−audio");
-                WebDriver driver = new ChromeDriver(op);
+                driver = new ChromeDriver(op);
                 watchAd(driver, username, password, loginWaitMillis, adWaitMillis, afterAdQuitMillis, adLoopCount);
             } catch (Exception e) {
+                for (String handle : driver.getWindowHandles()) {
+                    driver.switchTo().window(handle);
+                    driver.close();
+                }
+                driver.quit();
                 System.err.println(e.getMessage());
                 Thread.currentThread().interrupt();
                 executor.scheduleAtFixedRate(this, 0, schedulePeriodMin, TimeUnit.MINUTES);
@@ -99,6 +105,7 @@ public class Main {
                         }
                     }
                     watchAds(driver, adWaitMillis, (long) (10 - gained));
+                    return;
                 }
 
             } catch (Exception e) {
@@ -139,7 +146,8 @@ public class Main {
                     boolean isLimitReached = elements.get(0).getText().equalsIgnoreCase("Can't show video");
                     if (isLimitReached) {
                         System.out.println("Reklam Limiti doldu çıkılıyor");
-                        break;
+                        driver.navigate().refresh();
+                        return Integer.parseInt(driver.findElement(By.cssSelector("#balances > div > div.wallet-amount.pull-left.center > div > span")).getText()) + 9;
                     }
                 }
 
