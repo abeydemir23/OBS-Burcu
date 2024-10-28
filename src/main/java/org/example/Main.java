@@ -8,9 +8,13 @@ import org.openqa.selenium.chrome.ChromeDriver;
 import org.json.simple.*;
 import org.json.simple.parser.*;
 import org.openqa.selenium.chrome.ChromeOptions;
+import org.openqa.selenium.support.ui.ExpectedCondition;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.WebDriverWait;
 
 import java.io.*;
 
+import java.time.Duration;
 import java.util.List;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -170,10 +174,18 @@ public class Main {
             WebElement usernameField = driver.findElement(By.cssSelector("#manager-name"));
             WebElement passwordField = driver.findElement(By.cssSelector("#password"));
             WebElement actualLoginButton = driver.findElement(By.cssSelector("#login"));
+            Thread.currentThread().sleep(loginWaitMillis);
             usernameField.sendKeys(username);
+            Thread.currentThread().sleep(loginWaitMillis);
             passwordField.sendKeys(password);
             Thread.currentThread().sleep(loginWaitMillis);
             actualLoginButton.click();
+            WebDriverWait wdw = new WebDriverWait(driver, Duration.ofMillis(loginWaitMillis));
+            WebElement until = wdw.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector("#manager-name")));
+            if (until.isDisplayed()) {
+                System.out.println("Login işlemi başarılı");
+                return;
+            }
             Thread.currentThread().sleep(loginWaitMillis);
             List<WebElement> elements = driver.findElements(By.cssSelector("#page-signup > div.page.content.hidden-before-binding > div.register-information-container.horizontal-center-absolute > div.register-information-block.buttons > button"));
             if (elements.size() > 0 && elements.get(0).isDisplayed()) {
@@ -182,11 +194,23 @@ public class Main {
                 usernameField = driver.findElement(By.cssSelector("#manager-name"));
                 passwordField = driver.findElement(By.cssSelector("#password"));
                 actualLoginButton = driver.findElement(By.cssSelector("#login"));
+                Thread.currentThread().sleep(loginWaitMillis);
                 usernameField.sendKeys(username);
+                Thread.currentThread().sleep(loginWaitMillis);
                 passwordField.sendKeys(password);
                 Thread.currentThread().sleep(loginWaitMillis);
                 actualLoginButton.click();
                 Thread.currentThread().sleep(loginWaitMillis);
+                WebDriverWait wdw2 = new WebDriverWait(driver, Duration.ofMillis(loginWaitMillis));
+                WebElement until1 = wdw2.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector("#manager-name")));
+                if (until1.isDisplayed()) {
+                    System.out.println("Login işlemi başarılı");
+                    return;
+                }
+                else {
+                    System.err.println("Login işlemi başarısız");
+                    throw new RuntimeException();
+                }
             }
         }
     }
