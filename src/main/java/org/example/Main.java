@@ -66,6 +66,7 @@ public class Main {
                 ChromeOptions op = new ChromeOptions();
                 // add muted argument
                 op.addArguments("−−mute−audio");
+                op.addArguments("--headless");
                 driver = new ChromeDriver(op);
                 watchAd(driver, username, password, loginWaitMillis, adWaitMillis, afterAdQuitMillis, adLoopCount);
             } catch (Exception e) {
@@ -152,6 +153,7 @@ public class Main {
                 }
 
             }
+            driver.navigate().to("https://en.onlinesoccermanager.com/BusinessClub");
             driver.navigate().refresh();
             WebElement currentCoin = driver.findElement(By.cssSelector("#balances > div > div.wallet-amount.pull-left.center > div > span"));
             return Integer.parseInt(currentCoin.getText());
