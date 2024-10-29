@@ -70,7 +70,7 @@ public class Main {
                 ChromeOptions op = new ChromeOptions();
                 // add muted argument
                 op.addArguments("−−mute−audio");
-                op.addArguments("--headless");
+//                op.addArguments("--headless");
                 driver = new ChromeDriver(op);
                 watchAd(driver, username, password, loginWaitMillis, adWaitMillis, afterAdQuitMillis, adLoopCount);
             } catch (Exception e) {
@@ -96,7 +96,7 @@ public class Main {
 
             login(driver, username, password, loginWaitMillis);
             String originalHandle = driver.getWindowHandle();
-            int startCoin = Integer.parseInt(driver.findElement(By.cssSelector("#balances > div > div.wallet-amount.pull-left.center > div > span")).getText());
+            int startCoin = Integer.parseInt(driver.findElement(By.cssSelector("#balances > div.wallet-container.bosscoin-wallet.btn-new.btn-success > div.wallet-inner-shadow-overlay")).getText());
 
             try {
                 int currentCoin = watchAds(driver, adWaitMillis, adLoopCount);
@@ -129,7 +129,7 @@ public class Main {
             driver.switchTo().window(originalHandle);
             driver.navigate().refresh();
             Thread.currentThread().sleep(adWaitMillis);
-            WebElement currentCoin = driver.findElement(By.cssSelector("#balances > div > div.wallet-amount.pull-left.center > div > span"));
+            WebElement currentCoin = driver.findElement(By.cssSelector("#balances > div.wallet-container.bosscoin-wallet.btn-new.btn-success > div.wallet-inner-shadow-overlay"));
             System.out.println("Reklamlar bitti Mevcut Boss Coin : " + currentCoin.getText());
             driver.quit();
         }
@@ -137,7 +137,7 @@ public class Main {
         private static int watchAds(WebDriver driver, Long adWaitMillis, Long adLoopCount) throws InterruptedException {
             for (int i = 0; i < adLoopCount; i++) {
                 Thread.currentThread().sleep(adWaitMillis);
-                WebElement currentCoin = driver.findElement(By.cssSelector("#balances > div > div.wallet-amount.pull-left.center > div > span"));
+                WebElement currentCoin = driver.findElement(By.cssSelector("#balances > div.wallet-container.bosscoin-wallet.btn-new.btn-success > div.wallet-inner-shadow-overlay"));
                 System.out.println("Mevcut Boss Coin : " + currentCoin.getText());
                 driver.switchTo().newWindow(WindowType.TAB);
                 driver.get("https://en.onlinesoccermanager.com/BusinessClub");
@@ -152,14 +152,14 @@ public class Main {
                     if (isLimitReached) {
                         System.out.println("Reklam Limiti doldu çıkılıyor");
                         driver.navigate().refresh();
-                        return Integer.parseInt(driver.findElement(By.cssSelector("#balances > div > div.wallet-amount.pull-left.center > div > span")).getText()) + 9;
+                        return Integer.parseInt(driver.findElement(By.cssSelector("#balances > div.wallet-container.bosscoin-wallet.btn-new.btn-success > div.wallet-inner-shadow-overlay")).getText()) + 9;
                     }
                 }
 
             }
             driver.navigate().to("https://en.onlinesoccermanager.com/BusinessClub");
             driver.navigate().refresh();
-            WebElement currentCoin = driver.findElement(By.cssSelector("#balances > div > div.wallet-amount.pull-left.center > div > span"));
+            WebElement currentCoin = driver.findElement(By.cssSelector("#balances > div.wallet-container.bosscoin-wallet.btn-new.btn-success > div.wallet-inner-shadow-overlay"));
             return Integer.parseInt(currentCoin.getText());
         }
 
