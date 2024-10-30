@@ -1,9 +1,6 @@
 package org.example;
 
-import org.openqa.selenium.By;
-import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.WebElement;
-import org.openqa.selenium.WindowType;
+import org.openqa.selenium.*;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.json.simple.*;
 import org.json.simple.parser.*;
@@ -70,7 +67,7 @@ public class Main {
                 ChromeOptions op = new ChromeOptions();
                 // add muted argument
                 op.addArguments("−−mute−audio");
-//                op.addArguments("--headless");
+                op.addArguments("--headless");
                 driver = new ChromeDriver(op);
                 watchAd(driver, username, password, loginWaitMillis, adWaitMillis, afterAdQuitMillis, adLoopCount);
             } catch (Exception e) {
@@ -96,7 +93,9 @@ public class Main {
 
             login(driver, username, password, loginWaitMillis);
             String originalHandle = driver.getWindowHandle();
-            int startCoin = Integer.parseInt(driver.findElement(By.cssSelector("#balances > div.wallet-container.bosscoin-wallet.btn-new.btn-success > div.wallet-inner-shadow-overlay")).getText());
+            WebDriverWait wdw = new WebDriverWait(driver, Duration.ofMillis(loginWaitMillis));
+            WebElement until = wdw.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector("#balances > div > div.wallet-amount.pull-left.center > div > span")));
+            int startCoin = Integer.parseInt(driver.findElement(By.cssSelector("#balances > div > div.wallet-amount.pull-left.center > div > span")).getText());
 
             try {
                 int currentCoin = watchAds(driver, adWaitMillis, adLoopCount);
@@ -129,7 +128,7 @@ public class Main {
             driver.switchTo().window(originalHandle);
             driver.navigate().refresh();
             Thread.currentThread().sleep(adWaitMillis);
-            WebElement currentCoin = driver.findElement(By.cssSelector("#balances > div.wallet-container.bosscoin-wallet.btn-new.btn-success > div.wallet-inner-shadow-overlay"));
+            WebElement currentCoin = driver.findElement(By.cssSelector("#balances > div > div.wallet-amount.pull-left.center > div > span"));
             System.out.println("Reklamlar bitti Mevcut Boss Coin : " + currentCoin.getText());
             driver.quit();
         }
@@ -137,7 +136,7 @@ public class Main {
         private static int watchAds(WebDriver driver, Long adWaitMillis, Long adLoopCount) throws InterruptedException {
             for (int i = 0; i < adLoopCount; i++) {
                 Thread.currentThread().sleep(adWaitMillis);
-                WebElement currentCoin = driver.findElement(By.cssSelector("#balances > div.wallet-container.bosscoin-wallet.btn-new.btn-success > div.wallet-inner-shadow-overlay"));
+                WebElement currentCoin = driver.findElement(By.cssSelector("#balances > div > div.wallet-amount.pull-left.center > div > span"));
                 System.out.println("Mevcut Boss Coin : " + currentCoin.getText());
                 driver.switchTo().newWindow(WindowType.TAB);
                 driver.get("https://en.onlinesoccermanager.com/BusinessClub");
@@ -152,7 +151,7 @@ public class Main {
                     if (isLimitReached) {
                         System.out.println("Reklam Limiti doldu çıkılıyor");
                         driver.navigate().refresh();
-                        return Integer.parseInt(driver.findElement(By.cssSelector("#balances > div.wallet-container.bosscoin-wallet.btn-new.btn-success > div.wallet-inner-shadow-overlay")).getText()) + 9;
+                        return Integer.parseInt(driver.findElement(By.cssSelector("#balances > div > div.wallet-amount.pull-left.center > div > span")).getText()) + 9;
                     }
                 }
 
@@ -179,10 +178,11 @@ public class Main {
             Thread.currentThread().sleep(loginWaitMillis);
             passwordField.sendKeys(password);
             Thread.currentThread().sleep(loginWaitMillis);
-            actualLoginButton.click();
+            actualLoginButton.sendKeys(Keys.ENTER);
+//            actualLoginButton.click();
             WebDriverWait wdw = new WebDriverWait(driver, Duration.ofMillis(loginWaitMillis));
             WebElement until = wdw.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector("#manager-name")));
-            if (until.isDisplayed()) {
+            if (until != null) {
                 System.out.println("Login işlemi başarılı");
                 return;
             }
