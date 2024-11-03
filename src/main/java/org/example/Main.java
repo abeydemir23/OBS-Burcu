@@ -112,12 +112,13 @@ public class Main {
 
 
                 login(driver, username, password, loginWaitMillis);
-                driver.manage().timeouts().implicitlyWait(Duration.ofMillis(adWaitMillis));
+                driver.manage().timeouts().implicitlyWait(Duration.ofMillis(loginWaitMillis));
                 driver.get("https://en.onlinesoccermanager.com/BusinessClub");
                 new WebDriverWait(driver, Duration.ofSeconds(10)).until(ExpectedConditions.urlToBe("https://en.onlinesoccermanager.com/BusinessClub"));
+                driver.manage().timeouts().implicitlyWait(Duration.ofMillis(loginWaitMillis));
                 driver.navigate().refresh();
                 String originalHandle = driver.getWindowHandle();
-                int startCoin = Integer.parseInt(driver.findElement(By.cssSelector("#balances > div > div.wallet-amount.pull-left.center > div > span")).getText());
+                int startCoin = Integer.parseInt(driver.findElement(By.xpath("//*[@id=\"balances\"]/div/div[1]/div/span")).getText());
                 System.out.println("Başlangıç Coin : " + startCoin);
                 int currentReturnCoin = watchAds(driver, adWaitMillis, adLoopCount);
                 if (currentReturnCoin == 0) {
@@ -235,7 +236,8 @@ public class Main {
             passwordField.sendKeys(password);
             driver.manage().timeouts().implicitlyWait(Duration.ofMillis(loginWaitMillis));
 //            actualLoginButton.sendKeys(Keys.ENTER);
-            new Actions(driver).moveToElement(actualLoginButton).click().build().perform();
+            new Actions(driver).moveToElement(actualLoginButton).build().perform();
+            actualLoginButton.submit();
             driver.manage().timeouts().implicitlyWait(Duration.ofMillis(loginWaitMillis));
             WebDriverWait wdw = new WebDriverWait(driver, Duration.ofMillis(loginWaitMillis));
             boolean until = wdw.until(ExpectedConditions.urlToBe("https://en.onlinesoccermanager.com/ChooseLeague"));
