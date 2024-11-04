@@ -106,7 +106,7 @@ public class Main {
                 login(driver, username, password, loginWaitMillis);
                 driver.manage().timeouts().implicitlyWait(Duration.ofMillis(loginWaitMillis));
                 driver.get("https://en.onlinesoccermanager.com/BusinessClub");
-                new WebDriverWait(driver, Duration.ofSeconds(10)).until(ExpectedConditions.urlToBe("https://en.onlinesoccermanager.com/BusinessClub"));
+//                new WebDriverWait(driver, Duration.ofSeconds(10)).until(ExpectedConditions.urlToBe("https://en.onlinesoccermanager.com/BusinessClub"));
                 driver.manage().timeouts().implicitlyWait(Duration.ofMillis(loginWaitMillis));
                 driver.navigate().refresh();
                 String originalHandle = driver.getWindowHandle();
