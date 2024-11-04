@@ -50,8 +50,7 @@ public class Main {
         private ScheduledThreadPoolExecutor executor;
         private final List<WebDriver> drivers = new ArrayList<>();
 
-        public AdWatcher(String username, String password, Long loginWaitMillis,
-                         Long adWaitMillis, Long afterAdQuitMillis, Long adLoopCount, Long schedulePeriodMin, ScheduledThreadPoolExecutor executor) {
+        public AdWatcher(String username, String password, Long loginWaitMillis, Long adWaitMillis, Long afterAdQuitMillis, Long adLoopCount, Long schedulePeriodMin, ScheduledThreadPoolExecutor executor) {
             this.username = username;
             this.password = password;
             this.loginWaitMillis = loginWaitMillis;
@@ -85,32 +84,25 @@ public class Main {
 
         private static WebDriver closeAndQuitWebDriver(WebDriver driver) {
             String originalHandle = driver.getWindowHandle();
-            return driver.getWindowHandles().stream().filter(handle -> !handle.equals(originalHandle))
-                    .map(handle -> {
-                                System.out.println("Hatalı Pencere Kapanıyor");
-                                driver.switchTo().window(handle);
-                                driver.close();
-                                return driver;
-                            }
-                    ).map(webDriver -> {
-                                System.out.println("Hatalı WebDriver Kapanıyor");
-                                webDriver.switchTo().window(originalHandle).quit();
-                                return webDriver;
-                            }
-                    ).findFirst().get();
+            return driver.getWindowHandles().stream().filter(handle -> !handle.equals(originalHandle)).map(handle -> {
+                System.out.println("Hatalı Pencere Kapanıyor");
+                driver.switchTo().window(handle);
+                driver.close();
+                return driver;
+            }).map(webDriver -> {
+                System.out.println("Hatalı WebDriver Kapanıyor");
+                webDriver.switchTo().window(originalHandle).quit();
+                return webDriver;
+            }).findFirst().get();
         }
 
-        private static void watchAd(WebDriver driver, String username, String password, Long loginWaitMillis,
-                                    Long adWaitMillis, Long afterAdQuitMillis, Long adLoopCount) throws InterruptedException {
+        private static void watchAd(WebDriver driver, String username, String password, Long loginWaitMillis, Long adWaitMillis, Long afterAdQuitMillis, Long adLoopCount) throws InterruptedException {
             try {
 
                 driver.manage().window().maximize();
 
                 driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(10));
-
-                driver.get("https://en.onlinesoccermanager.com/PrivacyNotice?nextUrl=%2FLogin");
-
-
+                driver.navigate().to("https://en.onlinesoccermanager.com/ChooseLeague");
                 login(driver, username, password, loginWaitMillis);
                 driver.manage().timeouts().implicitlyWait(Duration.ofMillis(loginWaitMillis));
                 driver.get("https://en.onlinesoccermanager.com/BusinessClub");
@@ -174,14 +166,14 @@ public class Main {
 
         private static int watchAds(WebDriver driver, Long adWaitMillis, Long adLoopCount) throws InterruptedException {
             for (int i = 0; i < adLoopCount; i++) {
-                if (openAd(driver, adWaitMillis)< 0) {
+                if (openAd(driver, adWaitMillis) < 0) {
                     return 0;
                 }
 
             }
             driver.navigate().to("https://en.onlinesoccermanager.com/BusinessClub");
             driver.navigate().refresh();
-            WebElement currentCoin = driver.findElement(By.cssSelector("#balances > div.wallet-container.bosscoin-wallet.btn-new.btn-success > div.wallet-inner-shadow-overlay"));
+            WebElement currentCoin = driver.findElement(By.cssSelector("#balances > div > div.wallet-amount.pull-left.center > div > span"));
             return Integer.parseInt(currentCoin.getText());
         }
 
@@ -199,8 +191,7 @@ public class Main {
             List<WebElement> adLogo = driver.findElements(By.cssSelector("#aipLogo"));
             if (!adLogo.isEmpty()) {
                 System.out.println("Reklam Başarılı bir şekilde açıldı");
-            }
-            else {
+            } else {
 
                 List<WebElement> elements = driver.findElements(By.cssSelector("#modal-dialog-alert > div.row.row-h-xs-24.overflow-visible.modal-content-container > div > div > div > div.modal-header > h3"));
                 if (!elements.isEmpty()) {
@@ -220,6 +211,7 @@ public class Main {
         }
 
         private static void login(WebDriver driver, String username, String password, Long loginWaitMillis) throws InterruptedException {
+            driver.navigate().to("https://en.onlinesoccermanager.com/PrivacyNotice?nextUrl=%2FLogin");
             WebElement button = driver.findElement(By.cssSelector("#page-privacynotice > div > div > div:nth-child(2) > div:nth-child(3) > div > button"));
             button.click();
 
@@ -235,13 +227,12 @@ public class Main {
             driver.manage().timeouts().implicitlyWait(Duration.ofMillis(loginWaitMillis));
             passwordField.sendKeys(password);
             driver.manage().timeouts().implicitlyWait(Duration.ofMillis(loginWaitMillis));
-//            actualLoginButton.sendKeys(Keys.ENTER);
             new Actions(driver).moveToElement(actualLoginButton).build().perform();
+            driver.manage().timeouts().implicitlyWait(Duration.ofMillis(loginWaitMillis));
             actualLoginButton.submit();
             driver.manage().timeouts().implicitlyWait(Duration.ofMillis(loginWaitMillis));
-            WebDriverWait wdw = new WebDriverWait(driver, Duration.ofMillis(loginWaitMillis));
-            boolean until = wdw.until(ExpectedConditions.urlToBe("https://en.onlinesoccermanager.com/ChooseLeague"));
-            if (until) {
+            driver.manage().timeouts().implicitlyWait(Duration.ofMillis(loginWaitMillis * 2));
+            if (driver.getCurrentUrl().equalsIgnoreCase("https://en.onlinesoccermanager.com/ChooseLeague")) {
                 System.out.println("Login işlemi başarılı");
                 return;
             }
@@ -260,9 +251,7 @@ public class Main {
                 driver.manage().timeouts().implicitlyWait(Duration.ofMillis(loginWaitMillis));
                 actualLoginButton.click();
                 driver.manage().timeouts().implicitlyWait(Duration.ofMillis(loginWaitMillis));
-                boolean until1 = wdw.until(ExpectedConditions.urlToBe("https://en.onlinesoccermanager.com/ChooseLeague"));
-
-                if (until1) {
+                if (driver.getCurrentUrl().equalsIgnoreCase("https://en.onlinesoccermanager.com/ChooseLeague")) {
                     System.out.println("Login işlemi başarılı");
                     return;
                 } else {
