@@ -5,13 +5,16 @@ import org.openqa.selenium.chrome.ChromeDriver;
 import org.json.simple.*;
 import org.json.simple.parser.*;
 import org.openqa.selenium.chrome.ChromeOptions;
+import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
 import java.io.*;
 
 import java.time.Duration;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
@@ -94,7 +97,6 @@ public class Main {
         private static void watchAd(WebDriver driver, String username, String password, Long loginWaitMillis,
                                     Long adWaitMillis, Long afterAdQuitMillis, Long adLoopCount) throws InterruptedException {
             driver.manage().window().maximize();
-
             driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(10));
 
             driver.get("https://en.onlinesoccermanager.com/PrivacyNotice?nextUrl=%2FLogin");
@@ -129,7 +131,7 @@ public class Main {
                 throw e;
             }
             System.out.println("Reklamlar İzlendi " + afterAdQuitMillis + " ms Sonra Kapanıyor");
-            Thread.currentThread().sleep(afterAdQuitMillis);
+            driver.manage().timeouts().implicitlyWait(Duration.ofMillis(afterAdQuitMillis));
             for (String handle : driver.getWindowHandles()) {
                 if (!handle.equals(originalHandle)) {
                     driver.switchTo().window(handle);
@@ -139,7 +141,7 @@ public class Main {
 
             driver.switchTo().window(originalHandle);
             driver.navigate().refresh();
-            Thread.currentThread().sleep(adWaitMillis);
+            driver.manage().timeouts().implicitlyWait(Duration.ofMillis(adWaitMillis));
             WebElement currentCoin = driver.findElement(By.cssSelector("#balances > div.wallet-container.bosscoin-wallet.btn-new.btn-success > div.wallet-amount.pull-left.center > div > span"));
             System.out.println("Reklamlar bitti Mevcut Boss Coin : " + currentCoin.getText());
             driver.quit();
@@ -147,20 +149,20 @@ public class Main {
 
         private static int watchAds(WebDriver driver, Long adWaitMillis, Long adLoopCount) throws InterruptedException {
             for (int i = 0; i < adLoopCount; i++) {
-                Thread.currentThread().sleep(adWaitMillis);
+                driver.manage().timeouts().implicitlyWait(Duration.ofMillis(adWaitMillis));
                 Optional<WebElement> agreeButton = driver.findElements(By.cssSelector("body > div.fc-consent-root > div.fc-dialog-container > div.fc-dialog.fc-choice-dialog > div.fc-footer-buttons-container > div.fc-footer-buttons > button.fc-button.fc-cta-consent.fc-primary-button")).stream().findFirst();
                 agreeButton.ifPresent(WebElement::click);
                 WebElement currentCoin = driver.findElement(By.cssSelector("#balances > div.wallet-container.bosscoin-wallet.btn-new.btn-success > div.wallet-amount.pull-left.center > div > span"));
                 System.out.println("Mevcut Boss Coin : " + currentCoin.getText());
                 driver.switchTo().newWindow(WindowType.TAB);
                 driver.get("https://en.onlinesoccermanager.com/BusinessClub");
-                Thread.currentThread().sleep(adWaitMillis);
+                driver.manage().timeouts().implicitlyWait(Duration.ofMillis(adWaitMillis));
                 WebElement watchAdButton = driver.findElement(By.cssSelector("#body-content > div.row.row-h-sm-600.row-h-md-23.overflow-hidden.theme-stepover-0.businessclub-container > div.col-xs-12.col-h-xs-22.col-h-sm-20.businessclub-rows-container > div > div:nth-child(1) > div"));
                 watchAdButton.click();
                 System.out.println("Reklam başlatıldı.");
-                Thread.currentThread().sleep(adWaitMillis);
+                driver.manage().timeouts().implicitlyWait(Duration.ofMillis(adWaitMillis));
                 List<WebElement> elements = driver.findElements(By.cssSelector("#modal-dialog-alert > div.row.row-h-xs-24.overflow-visible.modal-content-container > div > div > div > div.modal-header > h3"));
-                if (elements.size() > 0) {
+                if (!elements.isEmpty()) {
                     boolean isLimitReached = elements.get(0).getText().equalsIgnoreCase("Can't show video");
                     if (isLimitReached) {
                         System.out.println("Reklam Limiti doldu çıkılıyor");
@@ -187,35 +189,34 @@ public class Main {
             WebElement usernameField = driver.findElement(By.cssSelector("#manager-name"));
             WebElement passwordField = driver.findElement(By.cssSelector("#password"));
             WebElement actualLoginButton = driver.findElement(By.cssSelector("#login"));
-            Thread.currentThread().sleep(loginWaitMillis);
+            driver.manage().timeouts().implicitlyWait(Duration.ofMillis(loginWaitMillis));
             usernameField.sendKeys(username);
-            Thread.currentThread().sleep(loginWaitMillis);
+            driver.manage().timeouts().implicitlyWait(Duration.ofMillis(loginWaitMillis));
             passwordField.sendKeys(password);
-            Thread.currentThread().sleep(loginWaitMillis);
+            driver.manage().timeouts().implicitlyWait(Duration.ofMillis(loginWaitMillis));
             new Actions(driver).moveToElement(actualLoginButton).build().perform();
             actualLoginButton.submit();
-//            actualLoginButton.click();
             WebDriverWait wdw = new WebDriverWait(driver, Duration.ofMillis(loginWaitMillis));
             WebElement until = wdw.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector("#manager-name")));
             if (until != null) {
                 System.out.println("Login işlemi başarılı");
                 return;
             }
-            Thread.currentThread().sleep(loginWaitMillis);
+            driver.manage().timeouts().implicitlyWait(Duration.ofMillis(loginWaitMillis));
             List<WebElement> elements = driver.findElements(By.cssSelector("#page-signup > div.page.content.hidden-before-binding > div.register-information-container.horizontal-center-absolute > div.register-information-block.buttons > button"));
-            if (elements.size() > 0 && elements.get(0).isDisplayed()) {
+            if (!elements.isEmpty() && elements.get(0).isDisplayed()) {
                 elements.get(0).click();
-                Thread.currentThread().sleep(loginWaitMillis);
+                driver.manage().timeouts().implicitlyWait(Duration.ofMillis(loginWaitMillis));
                 usernameField = driver.findElement(By.cssSelector("#manager-name"));
                 passwordField = driver.findElement(By.cssSelector("#password"));
                 actualLoginButton = driver.findElement(By.cssSelector("#login"));
-                Thread.currentThread().sleep(loginWaitMillis);
+                driver.manage().timeouts().implicitlyWait(Duration.ofMillis(loginWaitMillis));
                 usernameField.sendKeys(username);
-                Thread.currentThread().sleep(loginWaitMillis);
+                driver.manage().timeouts().implicitlyWait(Duration.ofMillis(loginWaitMillis));
                 passwordField.sendKeys(password);
-                Thread.currentThread().sleep(loginWaitMillis);
+                driver.manage().timeouts().implicitlyWait(Duration.ofMillis(loginWaitMillis));
                 actualLoginButton.click();
-                Thread.currentThread().sleep(loginWaitMillis);
+                driver.manage().timeouts().implicitlyWait(Duration.ofMillis(loginWaitMillis));
                 WebDriverWait wdw2 = new WebDriverWait(driver, Duration.ofMillis(loginWaitMillis));
                 WebElement until1 = wdw2.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector("#manager-name")));
                 if (until1.isDisplayed()) {
