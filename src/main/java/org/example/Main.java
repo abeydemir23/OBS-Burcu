@@ -11,6 +11,7 @@ import org.openqa.selenium.support.ui.WebDriverWait;
 
 import java.io.*;
 
+import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
@@ -31,11 +32,12 @@ public class Main {
         Long adWaitMillis = (Long) jsonObject.get("adWaitMillis");
         Long afterAdQuitMillis = (Long) jsonObject.get("afterAdQuitMillis");
         Long adLoopCount = (Long) jsonObject.get("adLoopCount");
+        Boolean visible = (Boolean) jsonObject.get("visible");
 
         ScheduledThreadPoolExecutor threadPool
                 = new ScheduledThreadPoolExecutor(2);
         // WebDriver'ı başlat
-        Runnable adWatcher = new AdWatcher(username, password, loginWaitMillis, adWaitMillis, afterAdQuitMillis, adLoopCount, schedulePeriodMin, threadPool);
+        Runnable adWatcher = new AdWatcher(username, password, loginWaitMillis, adWaitMillis, afterAdQuitMillis, adLoopCount, schedulePeriodMin, visible, threadPool);
 
         threadPool.scheduleAtFixedRate(adWatcher, 0, schedulePeriodMin, TimeUnit.MINUTES);
     }
@@ -48,10 +50,11 @@ public class Main {
         private final Long afterAdQuitMillis;
         private final Long adLoopCount;
         private final Long schedulePeriodMin;
+        private final Boolean visible;
         private ScheduledThreadPoolExecutor executor;
         private final List<WebDriver> drivers = new ArrayList<>();
 
-        public AdWatcher(String username, String password, Long loginWaitMillis, Long adWaitMillis, Long afterAdQuitMillis, Long adLoopCount, Long schedulePeriodMin, ScheduledThreadPoolExecutor executor) {
+        public AdWatcher(String username, String password, Long loginWaitMillis, Long adWaitMillis, Long afterAdQuitMillis, Long adLoopCount, Long schedulePeriodMin, Boolean visible, ScheduledThreadPoolExecutor executor) {
             this.username = username;
             this.password = password;
             this.loginWaitMillis = loginWaitMillis;
@@ -59,6 +62,7 @@ public class Main {
             this.afterAdQuitMillis = afterAdQuitMillis;
             this.adLoopCount = adLoopCount;
             this.schedulePeriodMin = schedulePeriodMin;
+            this.visible = visible;
             this.executor = executor;
         }
 
@@ -69,7 +73,10 @@ public class Main {
                 ChromeOptions op = new ChromeOptions();
                 // add muted argument
                 op.addArguments("−−mute−audio");
-                op.addArguments("--headless");
+                if (!visible) {
+                    op.addArguments("--headless");
+
+                }
                 driver = new ChromeDriver(op);
                 drivers.add(driver);
                 watchAd(driver, username, password, loginWaitMillis, adWaitMillis, afterAdQuitMillis, adLoopCount);
@@ -115,7 +122,7 @@ public class Main {
                 int currentCoin = watchAds(driver, adWaitMillis, adLoopCount);
                 int gained = currentCoin - startCoin;
                 if (gained < 9) {
-                    System.out.println("Eksik " + (10 - gained) + "coin tamamlanıyor");
+                    System.out.println(new String("Eksik ".getBytes(StandardCharsets.UTF_8), StandardCharsets.UTF_8) + (10 - gained) + new String("coin tamamlanıyor".getBytes(StandardCharsets.UTF_8), StandardCharsets.UTF_8));
                     for (String handle : driver.getWindowHandles()) {
                         if (!handle.equals(originalHandle)) {
                             driver.switchTo().window(handle);
@@ -127,10 +134,10 @@ public class Main {
                 }
 
             } catch (Exception e) {
-                System.out.println("Reklam butonuna tıklanamadı: " + e.getMessage());
+                System.out.println(new String("Reklam butonuna tıklanamadı: ".getBytes(StandardCharsets.UTF_8), StandardCharsets.UTF_8) + e.getMessage());
                 throw e;
             }
-            System.out.println("Reklamlar İzlendi " + afterAdQuitMillis + " ms Sonra Kapanıyor");
+            System.out.println(new String("Reklamlar İzlendi ".getBytes(StandardCharsets.UTF_8), StandardCharsets.UTF_8) + afterAdQuitMillis + new String(" ms Sonra Kapanıyor".getBytes(StandardCharsets.UTF_8), StandardCharsets.UTF_8));
             driver.manage().timeouts().implicitlyWait(Duration.ofMillis(afterAdQuitMillis));
             for (String handle : driver.getWindowHandles()) {
                 if (!handle.equals(originalHandle)) {
@@ -143,7 +150,7 @@ public class Main {
             driver.navigate().refresh();
             driver.manage().timeouts().implicitlyWait(Duration.ofMillis(adWaitMillis));
             WebElement currentCoin = driver.findElement(By.cssSelector("#balances > div.wallet-container.bosscoin-wallet.btn-new.btn-success > div.wallet-amount.pull-left.center > div > span"));
-            System.out.println("Reklamlar bitti Mevcut Boss Coin : " + currentCoin.getText());
+            System.out.println(new String("Reklamlar bitti Mevcut Boss Coin : ".getBytes(StandardCharsets.UTF_8), StandardCharsets.UTF_8) + currentCoin.getText());
             driver.quit();
         }
 
@@ -153,19 +160,19 @@ public class Main {
                 Optional<WebElement> agreeButton = driver.findElements(By.cssSelector("body > div.fc-consent-root > div.fc-dialog-container > div.fc-dialog.fc-choice-dialog > div.fc-footer-buttons-container > div.fc-footer-buttons > button.fc-button.fc-cta-consent.fc-primary-button")).stream().findFirst();
                 agreeButton.ifPresent(WebElement::click);
                 WebElement currentCoin = driver.findElement(By.cssSelector("#balances > div.wallet-container.bosscoin-wallet.btn-new.btn-success > div.wallet-amount.pull-left.center > div > span"));
-                System.out.println("Mevcut Boss Coin : " + currentCoin.getText());
+                System.out.println(new String("Mevcut Boss Coin : ".getBytes(StandardCharsets.UTF_8), StandardCharsets.UTF_8) + currentCoin.getText());
                 driver.switchTo().newWindow(WindowType.TAB);
                 driver.get("https://en.onlinesoccermanager.com/BusinessClub");
                 driver.manage().timeouts().implicitlyWait(Duration.ofMillis(adWaitMillis));
                 WebElement watchAdButton = driver.findElement(By.cssSelector("#body-content > div.row.row-h-sm-600.row-h-md-23.overflow-hidden.theme-stepover-0.businessclub-container > div.col-xs-12.col-h-xs-22.col-h-sm-20.businessclub-rows-container > div > div:nth-child(1) > div"));
                 watchAdButton.click();
-                System.out.println("Reklam başlatıldı.");
+                System.out.println(new String("Reklam başlatıldı.".getBytes(StandardCharsets.UTF_8), StandardCharsets.UTF_8));
                 driver.manage().timeouts().implicitlyWait(Duration.ofMillis(adWaitMillis));
                 List<WebElement> elements = driver.findElements(By.cssSelector("#modal-dialog-alert > div.row.row-h-xs-24.overflow-visible.modal-content-container > div > div > div > div.modal-header > h3"));
                 if (!elements.isEmpty()) {
                     boolean isLimitReached = elements.get(0).getText().equalsIgnoreCase("Can't show video");
                     if (isLimitReached) {
-                        System.out.println("Reklam Limiti doldu çıkılıyor");
+                        System.out.println(new String("Reklam Limiti doldu çıkılıyor".getBytes(StandardCharsets.UTF_8), StandardCharsets.UTF_8));
                         driver.navigate().refresh();
                         return Integer.parseInt(driver.findElement(By.cssSelector("#balances > div.wallet-container.bosscoin-wallet.btn-new.btn-success > div.wallet-amount.pull-left.center > div > span")).getText()) + 9;
                     }
@@ -199,7 +206,7 @@ public class Main {
             WebDriverWait wdw = new WebDriverWait(driver, Duration.ofMillis(loginWaitMillis));
             WebElement until = wdw.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector("#manager-name")));
             if (until != null) {
-                System.out.println("Login işlemi başarılı");
+                System.out.println(new String("Login işlemi başarılı".getBytes(StandardCharsets.UTF_8), StandardCharsets.UTF_8));
                 return;
             }
             driver.manage().timeouts().implicitlyWait(Duration.ofMillis(loginWaitMillis));
@@ -220,11 +227,10 @@ public class Main {
                 WebDriverWait wdw2 = new WebDriverWait(driver, Duration.ofMillis(loginWaitMillis));
                 WebElement until1 = wdw2.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector("#manager-name")));
                 if (until1.isDisplayed()) {
-                    System.out.println("Login işlemi başarılı");
+                    System.out.println(new String("Login işlemi başarılı".getBytes(StandardCharsets.UTF_8), StandardCharsets.UTF_8));
                     return;
-                }
-                else {
-                    System.err.println("Login işlemi başarısız");
+                } else {
+                    System.err.println(new String("Login işlemi başarısız".getBytes(StandardCharsets.UTF_8), StandardCharsets.UTF_8));
                     throw new RuntimeException();
                 }
             }
