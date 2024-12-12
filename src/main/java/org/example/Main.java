@@ -165,7 +165,7 @@ public class Main {
                         }
                         sb.append(" Dk sonra tekrar deneyin");
                         System.out.println(sb);
-                        sb.delete(0, sb.length());
+                        sb.setLength(0);
                         driver.navigate().refresh();
                         return Integer.parseInt(driver.findElement(By.cssSelector("#balances > div.wallet-container.bosscoin-wallet.btn-new.btn-success > div.wallet-amount.pull-left.center > div > span")).getText()) + 9;
                     }
